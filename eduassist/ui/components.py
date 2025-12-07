@@ -11,25 +11,23 @@ from ..services.translation_service import (
 
 def render_top_bar():
     """Render the top navigation bar with logo, language selector and auth buttons."""
-    st.markdown("""
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid #e5e5e5; margin-bottom: 2rem;">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-                <div style="width: 36px; height: 36px; background: #1a1a1a; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.875rem;">JE</div>
-                <span style="font-size: 1rem; font-weight: 600; color: #1a1a1a;">JNTU EduAssist</span>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
+    col_logo, col_nav = st.columns([2, 3])
     
-    col1, col2, col3, col4 = st.columns([6, 1, 1, 1])
+    with col_logo:
+        st.markdown("""<div class="logo-section" style="display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0;"><div class="logo-icon" style="width: 36px; height: 36px; background: #1a1a1a; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.875rem;">JE</div><span class="logo-text" style="font-size: 1rem; font-weight: 600; color: #1a1a1a;">JNTU EduAssist</span></div>""", unsafe_allow_html=True)
     
-    with col2:
-        render_language_dropdown()
+    with col_nav:
+        st.markdown('<div class="nav-section" style="display: flex; justify-content: flex-end; align-items: center; gap: 0.5rem;">', unsafe_allow_html=True)
+        c1, c2, c3 = st.columns([1, 1, 1])
+        with c1:
+            render_language_dropdown()
+        with c2:
+            render_auth_buttons_login()
+        with c3:
+            render_auth_buttons_signup()
+        st.markdown('</div>', unsafe_allow_html=True)
     
-    with col3:
-        render_auth_buttons_login()
-    
-    with col4:
-        render_auth_buttons_signup()
+    st.markdown('<div class="top-bar-container" style="border-bottom: 1px solid #e5e5e5; margin-bottom: 1.5rem;"></div>', unsafe_allow_html=True)
 
 
 def render_language_dropdown():
@@ -56,11 +54,11 @@ def render_auth_buttons_login():
     user = st.session_state.get('user')
     
     if user:
-        if st.button("Logout", key="top_logout", use_container_width=True):
+        if st.button("Logout", key="top_logout"):
             st.session_state.user = None
             st.rerun()
     else:
-        if st.button("LOGIN", key="top_login", use_container_width=True):
+        if st.button("LOGIN", key="top_login"):
             st.session_state.show_auth_modal = "login"
             st.session_state.current_page = "auth"
             st.rerun()
@@ -77,7 +75,7 @@ def render_auth_buttons_signup():
             </div>
         """, unsafe_allow_html=True)
     else:
-        if st.button("SIGN UP", key="top_signup", use_container_width=True):
+        if st.button("SIGN UP", key="top_signup"):
             st.session_state.show_auth_modal = "signup"
             st.session_state.current_page = "auth"
             st.rerun()
@@ -182,30 +180,24 @@ def render_dashboard():
         }
     ]
     
-    st.markdown('<div style="border: 1px solid #e5e5e5; border-radius: 12px; overflow: hidden;">', unsafe_allow_html=True)
+    service_label = translate_text("SERVICE", lang)
+    open_text = translate_text("OPEN", lang)
     
-    cols = st.columns(2)
+    col1, col2 = st.columns(2)
+    
     for idx, app in enumerate(apps):
-        with cols[idx % 2]:
-            badge_html = ""
-            if app["badge"]:
-                badge_html = f'<div style="position: absolute; top: 1.5rem; right: 1.5rem; background: #1a1a1a; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.05em;">{app["badge"]}</div>'
-            elif app["requires_login"]:
-                badge_text = translate_text("LOGIN", lang)
-                badge_html = f'<div style="position: absolute; top: 1.5rem; right: 1.5rem; background: #1a1a1a; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.05em;">{badge_text}</div>'
-            
-            service_label = translate_text("SERVICE", lang)
-            open_text = translate_text("OPEN", lang)
-            
-            st.markdown(f"""
-                <div style="background: white; padding: 2rem; position: relative; border-bottom: 1px solid #e5e5e5; min-height: 200px;">
-                    {badge_html}
-                    <div style="font-size: 0.7rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: #999; margin-bottom: 1rem;">{service_label} {app["number"]}</div>
-                    <h3 style="font-size: 1.25rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.75rem;">{app["title"]}</h3>
-                    <p style="font-size: 0.875rem; color: #666; line-height: 1.5; margin-bottom: 1.5rem;">{app["desc"]}</p>
-                </div>
-            """, unsafe_allow_html=True)
-            
+        badge_html = ""
+        if app["badge"]:
+            badge_html = f'<span style="position: absolute; top: 1rem; right: 1rem; background: #1a1a1a; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.05em;">{app["badge"]}</span>'
+        elif app["requires_login"]:
+            badge_text = translate_text("LOGIN", lang)
+            badge_html = f'<span style="position: absolute; top: 1rem; right: 1rem; background: #1a1a1a; color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.05em;">{badge_text}</span>'
+        
+        card_html = f'<div style="background: white; padding: 1.5rem; position: relative; border: 1px solid #e5e5e5; border-radius: 12px; margin-bottom: 0.5rem; min-height: 160px;">{badge_html}<div style="font-size: 0.7rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: #999; margin-bottom: 0.75rem;">{service_label} {app["number"]}</div><h3 style="font-size: 1.125rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.5rem;">{app["title"]}</h3><p style="font-size: 0.8rem; color: #666; line-height: 1.5;">{app["desc"]}</p></div>'
+        
+        current_col = col1 if idx % 2 == 0 else col2
+        with current_col:
+            st.markdown(card_html, unsafe_allow_html=True)
             if st.button(f"{open_text} \u2192", key=f"open_{app['key']}", use_container_width=True):
                 if app["requires_login"] and not user:
                     st.session_state.show_auth_modal = "login"
@@ -213,8 +205,6 @@ def render_dashboard():
                 else:
                     st.session_state.active_tab = app["key"]
                 st.rerun()
-    
-    st.markdown('</div>', unsafe_allow_html=True)
 
 
 def get_icon_svg(icon_name: str) -> str:
